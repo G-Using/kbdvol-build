@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>items</key>
+	<array>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>键盘打字声</string>
+			<key>footerText</key>
+			<string>独立于静音拨片和系统音量。拉到 0 就是完全不打字声，来电、通知、铃声照常响。&#10;&#10;外部键盘与第三方输入法（百度 / 搜狗 / 微信输入法等）的按键声，请到那些 App 自己的设置里关闭。</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>label</key>
+			<string>启用独立音量控制</string>
+			<key>key</key>
+			<string>enabled</string>
+			<key>defaults</key>
+			<string>com.gusing.kbdvol</string>
+			<key>default</key>
+			<true/>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSliderCell</string>
+			<key>label</key>
+			<string>打字声音量</string>
+			<key>key</key>
+			<string>volume</string>
+			<key>defaults</key>
+			<string>com.gusing.kbdvol</string>
+			<key>default</key>
+			<real>1.0</real>
+			<key>min</key>
+			<real>0.0</real>
+			<key>max</key>
+			<real>1.0</real>
+			<key>showValue</key>
+			<true/>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>诊断</string>
+			<key>footerText</key>
+			<string>打字声是否真的挂上，以下面按钮显示的「已挂钩 N 个入口」为准。</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>title</key>
+			<string>查看插件状态</string>
+			<key>action</key>
+			<string>showDiag</string>
+		</dict>
+	</array>
+</dict>
+</plist>
