@@ -59,6 +59,17 @@ static void KvbSetDiag(NSString *s) {
     NSUserDefaults *d = KvbDefaults();
     [d setObject:s forKey:KVKeyDiag];
     [d synchronize];
+
+    // 同时落盘：App 一关偏好还在，但"哪个进程挂了几个"的信息会覆盖，
+    // 落盘文件能保留最后一次真实结果，用户可以直接把文件发回来。
+    NSString *path = @"/var/mobile/Documents/KbdVol-hooks.txt";
+    NSError *err = nil;
+    NSString *text = [NSString stringWithFormat:@"%@\n\n=== %@ ===\n%@\n",
+                      [NSDate date], [[NSProcessInfo processInfo] processName], s];
+    if (![text writeToFile:path atomically:YES encoding:NSUTF8StringEncoding error:&err]) {
+        NSLog(@"[KbdVol] diag write failed: %@", err);
+    }
+    NSLog(@"[KbdVol] %@", s);
 }
 
 // 每秒最多刷新一次，避免每次按键都走 cfprefsd
@@ -120,6 +131,8 @@ static void KvbFire(id self, SEL cmd, IMP orig, id arg) {
 
 static NSMutableArray *gBlockKeepalive = nil;
 static NSUInteger gHookCount = 0;
+static NSUInteger gKeyboardClassCount = 0;   // 名字含 Keyboard 的类有几个
+static NSUInteger gSelectorSeen = 0;         // 匹配上 selector 名单的有几个
 
 static void KvbHookOneClass(Class cls, BOOL classMethod, NSMutableString *log) {
     Class target = classMethod ? object_getClass(cls) : cls;
@@ -133,6 +146,7 @@ static void KvbHookOneClass(Class cls, BOOL classMethod, NSMutableString *log) {
         SEL sel = method_getName(methods[i]);
         const char *sn = sel_getName(sel);
         if (!KvbIsTargetSelector(sn)) continue;
+        gSelectorSeen++;
 
         __block IMP orig = NULL;
         SEL keepSel = sel;
@@ -174,12 +188,17 @@ static void KvbInstallHooks(void) {
 
         gBlockKeepalive = [NSMutableArray array];
         gHookCount = 0;
+        gKeyboardClassCount = 0;
+        gSelectorSeen = 0;
         NSMutableString *log = [NSMutableString string];
 
         // iOS 上objc_copyClassList 是单参数版本：只传 outCount，返回的数组以 NULL 结尾
         unsigned int count = 0;
         Class *classes = objc_copyClassList(&count);
-        if (classes == NULL) return;
+        if (classes == NULL) {
+            KvbSetDiag(@"KvbInstallHooks: objc_copyClassList 返回空，无法扫描");
+            return;
+        }
 
         for (unsigned int i = 0; i < count; i++) {
             if (classes[i] == NULL) continue;
@@ -187,6 +206,7 @@ static void KvbInstallHooks(void) {
             if (cn == NULL) continue;
             // 只碰键盘相关类，避免误伤
             if (strstr(cn, "Keyboard") == NULL) continue;
+            gKeyboardClassCount++;
             KvbHookOneClass(classes[i], NO, log);
             KvbHookOneClass(classes[i], YES, log);
         }
@@ -195,14 +215,35 @@ static void KvbInstallHooks(void) {
         NSUInteger hooked = gHookCount;
         NSString *detail = (hooked > 0)
             ? [NSString stringWithFormat:@"%lu 个入口：\n%@", (unsigned long)hooked, log]
-            : @"(未找到播放入口，功能不生效)";
+            : @"(未挂上播放入口)";
+
+        // 三种失败要能区分开，否则用户只看到"没生效"，无从下手：
+        //   A. 没找到任何 Keyboard 类   → 过滤条件太严
+        //   B. 找到类但没匹配到 selector → selector 名单太窄（iOS 改名了）
+        //   C. 匹配到但MSHookMessageEx 没填 orig → hook 失败
+        NSString *verdict = nil;
+        if (hooked > 0) {
+            verdict = @"正常";
+        } else if (gKeyboardClassCount == 0) {
+            verdict = @"失败A：没扫描到任何名字含 Keyboard 的类";
+        } else if (gSelectorSeen == 0) {
+            verdict = [NSString stringWithFormat:
+                       @"失败B：扫到 %lu 个键盘类，但没有方法名匹配 selector 名单"
+                       @"（iOS 可能改了私有 API 名，需要更新名单）",
+                       (unsigned long)gKeyboardClassCount];
+        } else {
+            verdict = [NSString stringWithFormat:
+                       @"失败C：%lu 个方法名匹配了，但 MSHookMessageEx 都没挂上",
+                       (unsigned long)gSelectorSeen];
+        }
 
         NSString *diag = [NSString stringWithFormat:
-            @"音色：%@\n已挂钩 %lu 个入口：\n%@",
-            [path lastPathComponent], (unsigned long)hooked, detail];
+            @"音色：%@\n已挂钩 %lu 个入口\n键盘类：%lu 个 · 匹配方法：%lu 个\n结论：%@\n%@",
+            [path lastPathComponent], (unsigned long)hooked,
+            (unsigned long)gKeyboardClassCount, (unsigned long)gSelectorSeen,
+            verdict, detail];
 
         KvbSetDiag(diag);
-        NSLog(@"[KbdVol] hooks=%lu path=%@", (unsigned long)hooked, path);
     }
 }
 
