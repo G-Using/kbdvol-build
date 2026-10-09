@@ -9,10 +9,8 @@
 #import <UIKit/UIKit.h>
 #import <Preferences/PSListController.h>
 #import <Preferences/PSSpecifier.h>
-#import <Preferences/PSSwitchCell.h>
-#import <Preferences/PSSliderCell.h>
-#import <Preferences/PSButtonCell.h>
-#import <Preferences/PSGroupCell.h>
+// PSSwitchCell / PSSliderCell / PSButtonCell / PSGroupCell 没有独立头文件，
+// 都由 PSListController.h 一起提供（写成单独 import 会 file not found）
 #import "KbdCommon.h"
 
 @interface KbdVolPrefsRootController : PSListController
