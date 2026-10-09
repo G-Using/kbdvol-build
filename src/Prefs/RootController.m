@@ -1,8 +1,16 @@
 // RootController.m —— 设置面板。plist 驱动，代码里不构造任何 PSSpecifier。
 
+#import <UIKit/UIKit.h>
+#import <Preferences/PSListController.h>
 #import "KbdCommon.h"
 
 @interface KbdVolPrefsRootController : PSListController
+@end
+
+// _specifiers 是 PSListController 的 ivar，SDK 头文件里不暴露，这里声明一个同名 ivar
+@interface KbdVolPrefsRootController () {
+    NSArray *_specifiers;
+}
 @end
 
 @implementation KbdVolPrefsRootController
