@@ -1,6 +1,6 @@
 Package: com.gusing.kbdvol
 Name: KbdVol
-Version: 1.0.0
+Version: 1.0.1
 Architecture: iphoneos-arm64
 Description: 独立控制键盘打字声音音量。音量拉到 0 即可在不拨静音拨片、不影响来电通知的前提下关闭打字声；音量 100% 时完全走系统原声，零延迟。
 Maintainer: G-Using
