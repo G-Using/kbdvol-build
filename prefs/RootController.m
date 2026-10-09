@@ -8,6 +8,11 @@
 
 #import <UIKit/UIKit.h>
 #import <Preferences/PSListController.h>
+#import <Preferences/PSSpecifier.h>
+#import <Preferences/PSSwitchCell.h>
+#import <Preferences/PSSliderCell.h>
+#import <Preferences/PSButtonCell.h>
+#import <Preferences/PSGroupCell.h>
 #import "KbdCommon.h"
 
 @interface KbdVolPrefsRootController : PSListController
