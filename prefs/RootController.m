@@ -162,8 +162,11 @@ static void DiagLog(NSString *fmt, ...) {
         objc_setAssociatedObject(self, kKey, cached, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         DiagLog(@"buildSpecifiers 生成 %lu 行", (unsigned long)cached.count);
         for (PSSpecifier *s in cached) {
+            // cell / name 都不是公开属性，只能从 properties 字典里读
+            id cellName = s.properties[@"cell"];
+            id label = s.properties[@"label"];
             DiagLog(@"  spec: cell=%@ label=%@ key=%@",
-                    s.cell, s.name, s.properties[@"key"]);
+                    cellName, label, s.properties[@"key"]);
         }
     }
     return cached;
