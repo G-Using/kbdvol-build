@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>bundle</key>
+	<string>KbdVolPrefs</string>
+	<key>entry_class</key>
+	<string>KbdVolPrefsRootController</string>
+	<key>icon</key>
+	<string>icon.png</string>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>zh_CN</string>
+	<key>CFBundleDisplayName</key>
+	<string>键盘音量</string>
+	<key>CFBundleExecutable</key>
+	<string>KbdVolPrefs</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.gusing.kbdvolprefs</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>KbdVolPrefs</string>
+	<key>CFBundlePackageType</key>
+	<string>BNDL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0.0</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>PSLinkCell</key>
+	<string>PSLinkCell</string>
+	<key>PSListControllerClass</key>
+	<string>KbdVolPrefsRootController</string>
+	<key>PSTemplateSpecifier</key>
+	<string>Root</string>
+</dict>
+</plist>
