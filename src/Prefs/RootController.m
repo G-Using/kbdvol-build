@@ -17,13 +17,8 @@
 
 - (void)showDiag {
     dispatch_async(dispatch_get_main_queue(), ^{
-        CFPropertyListRef v = CFPreferencesCopyAppValue((__bridge CFStringRef)KVKeyDiag,
-                                                        (__bridge CFStringRef)KVDomain);
-        NSString *diag = nil;
-        if (v != NULL) {
-            diag = [(__bridge id)v description];
-            CFRelease(v);
-        }
+        NSUserDefaults *d = [[NSUserDefaults alloc] initWithSuiteName:KVDomain];
+        NSString *diag = [d stringForKey:KVKeyDiag];
 
         NSString *msg = nil;
         if (diag.length == 0) {
