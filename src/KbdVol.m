@@ -28,24 +28,37 @@ static float   gCachedVol   = 1.0f;
 static BOOL    gCachedOn    = YES;
 static NSTimeInterval gCachedAt = 0;
 
+// 偏好读写：走 NSUserDefaults 的 suite，和设置面板写的是同一个域。
+// （不用 CFPreferencesSetValue —— 16.5 SDK 上它是 5 参数版本，写错会直接编译失败。）
+static NSUserDefaults *KvbDefaults(void) {
+    static NSUserDefaults *d = nil;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        d = [[NSUserDefaults alloc] initWithSuiteName:KVDomain];
+    });
+    return d;
+}
+
 static BOOL KvbEnabled(void) {
-    CFPropertyListRef v = CFPreferencesCopyAppValue((__bridge CFStringRef)KVKeyEnabled,
-                                                    (__bridge CFStringRef)KVDomain);
-    if (v == NULL) return YES;                       // 没写过 = 默认开
-    BOOL b = [(__bridge id)v boolValue];
-    CFRelease(v);
-    return b;
+    NSUserDefaults *d = KvbDefaults();
+    if ([d objectForKey:KVKeyEnabled] == nil) return YES;   // 没写过 = 默认开
+    return [d boolForKey:KVKeyEnabled];
 }
 
 static float KvbVolume(void) {
-    CFPropertyListRef v = CFPreferencesCopyAppValue((__bridge CFStringRef)KVKeyVolume,
-                                                    (__bridge CFStringRef)KVDomain);
-    if (v == NULL) return 1.0f;                      // 没写过 = 默认 100%
-    float f = (float)[(__bridge id)v doubleValue];
-    CFRelease(v);
+    NSUserDefaults *d = KvbDefaults();
+    id v = [d objectForKey:KVKeyVolume];
+    if (![v isKindOfClass:[NSNumber class]]) return 1.0f;   // 没写过 = 默认 100%
+    float f = (float)[(NSNumber *)v doubleValue];
     if (f < 0.0f) f = 0.0f;
     if (f > 1.0f) f = 1.0f;
     return f;
+}
+
+static void KvbSetDiag(NSString *s) {
+    NSUserDefaults *d = KvbDefaults();
+    [d setObject:s forKey:KVKeyDiag];
+    [d synchronize];
 }
 
 // 每秒最多刷新一次，避免每次按键都走 cfprefsd
@@ -151,12 +164,7 @@ static void KvbInstallHooks(void) {
 
         // 找不到音色文件 —— 不装任何 hook，一切保持系统原样
         if (path == nil) {
-            const char *msg = "KbdVol: 未找到系统键盘音文件，本进程未挂钩（保持系统原样）";
-            CFPreferencesSetValue((__bridge CFStringRef)KVKeyDiag,
-                                  (__bridge CFStringRef)msg,
-                                  (__bridge CFStringRef)KVDomain);
-            CFPreferencesAppSynchronize((__bridge CFStringRef)KVDomain);
-            NSLog(@"[KbdVol] %s", msg);
+            KvbSetDiag(@"KbdVol: 未找到系统键盘音文件，本进程未挂钩（保持系统原样）");
             return;
         }
 
@@ -189,10 +197,7 @@ static void KvbInstallHooks(void) {
             @"音色：%@\n已挂钩 %lu 个入口：\n%@",
             [path lastPathComponent], (unsigned long)hooked, detail];
 
-        CFPreferencesSetValue((__bridge CFStringRef)KVKeyDiag,
-                              (__bridge CFStringRef)diag,
-                              (__bridge CFStringRef)KVDomain);
-        CFPreferencesAppSynchronize((__bridge CFStringRef)KVDomain);
+        KvbSetDiag(diag);
         NSLog(@"[KbdVol] hooks=%lu path=%@", (unsigned long)hooked, path);
     }
 }
