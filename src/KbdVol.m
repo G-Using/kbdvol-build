@@ -118,10 +118,10 @@ static void KvbFire(id self, SEL cmd, IMP orig, id arg) {
 
 // ---------------------------------------------------------------- 挂钩安装
 
-static NSMutableArray *gHookLog = nil;
 static NSMutableArray *gBlockKeepalive = nil;
+static NSUInteger gHookCount = 0;
 
-static void KvbHookOneClass(Class cls, BOOL classMethod, NSString *log) {
+static void KvbHookOneClass(Class cls, BOOL classMethod, NSMutableString *log) {
     Class target = classMethod ? object_getClass(cls) : cls;
     const char *cn = class_getName(cls);
 
@@ -144,9 +144,13 @@ static void KvbHookOneClass(Class cls, BOOL classMethod, NSString *log) {
         // imp_implementationWithBlock 内部会 copy 一份，但保险起见我们自己再持有原始 block
         [gBlockKeepalive addObject:blk];
 
-        if (MSHookMessageEx(target, keepSel, newIMP, &orig) != NO) {
+        // 注意：MSHookMessageEx 返回 void，成功与否看 orig 有没有被填上
+        MSHookMessageEx(target, keepSel, newIMP, &orig);
+        if (orig != NULL) {
             NSString *kind = classMethod ? @" (class)" : @"";
-            [log appendFormat:@"%@ %@%@\n", cn, sn, kind];
+            [log appendFormat:@"%@ %@%@\n", [NSString stringWithUTF8String:cn],
+                                          [NSString stringWithUTF8String:sn], kind];
+            gHookCount++;
         }
     }
     free(methods);
@@ -168,17 +172,17 @@ static void KvbInstallHooks(void) {
             return;
         }
 
-        gHookLog = [NSMutableArray array];
         gBlockKeepalive = [NSMutableArray array];
-        NSString *log = gHookLog;
+        gHookCount = 0;
+        NSMutableString *log = [NSMutableString string];
 
-        int count = objc_copyClassList(NULL, 0);
-        if (count <= 0) return;
-        Class *classes = (Class *)malloc(sizeof(Class) * (size_t)count);
+        // iOS 上objc_copyClassList 是单参数版本：只传 outCount，返回的数组以 NULL 结尾
+        unsigned int count = 0;
+        Class *classes = objc_copyClassList(&count);
         if (classes == NULL) return;
-        count = objc_copyClassList(classes, count);
 
-        for (int i = 0; i < count; i++) {
+        for (unsigned int i = 0; i < count; i++) {
+            if (classes[i] == NULL) continue;
             const char *cn = class_getName(classes[i]);
             if (cn == NULL) continue;
             // 只碰键盘相关类，避免误伤
@@ -188,10 +192,10 @@ static void KvbInstallHooks(void) {
         }
         free(classes);
 
-        NSUInteger hooked = [gHookLog count];
+        NSUInteger hooked = gHookCount;
         NSString *detail = (hooked > 0)
-            ? [gHookLog componentsJoinedByString:@""]
-            : @"(未找到播放入口，功能不生效)\n";
+            ? [NSString stringWithFormat:@"%lu 个入口：\n%@", (unsigned long)hooked, log]
+            : @"(未找到播放入口，功能不生效)";
 
         NSString *diag = [NSString stringWithFormat:
             @"音色：%@\n已挂钩 %lu 个入口：\n%@",
