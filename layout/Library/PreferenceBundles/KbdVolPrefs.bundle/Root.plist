@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>items</key>
+	<array>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>footerText</key>
+			<string>只调节系统键盘的打字声，不影响来电、通知、铃声。音量调到 0 就等于"不打字声"，不用再拨静音拨片。&#10;需要外部键盘或第三方输入法（百度/搜狗/微信输入法等）的按键声，请到各自 App 内关闭。</string>
+			<key>label</key>
+			<string>键盘打字声</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>defaults</key>
+			<string>com.gusing.kbdvol</string>
+			<key>key</key>
+			<string>enabled</string>
+			<key>label</key>
+			<string>启用独立音量控制</string>
+			<key>default</key>
+			<true/>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSliderCell</string>
+			<key>defaults</key>
+			<string>com.gusing.kbdvol</string>
+			<key>key</key>
+			<string>volume</string>
+			<key>label</key>
+			<string>打字声音量</string>
+			<key>defaultValue</key>
+			<real>1.0</real>
+			<key>min</key>
+			<real>0.0</real>
+			<key>max</key>
+			<real>1.0</real>
+			<key>showValue</key>
+			<true/>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>诊断</string>
+		</dict>
+		<dict>
+			<key>action</key>
+			<string>showDiag</string>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>title</key>
+			<string>查看插件状态</string>
+		</dict>
+	</array>
+</dict>
+</plist>
