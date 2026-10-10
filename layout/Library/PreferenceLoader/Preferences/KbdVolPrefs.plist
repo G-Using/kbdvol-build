@@ -2,17 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<!--
-	    入口 + 面板内容合一（照抄已成功出包的项目 WXKeyboardToolbarPlus 的做法）。
-
-	    为什么这么写（都是 .ips 崩溃栈换来的）：
-	     · detail 用系统的 PSListItemsController，**不要**写自定义控制器类名。
-	       之前写 KbdVolPrefsRootController + isController=YES，系统会走
-	       「控制器直连」路径、用系统 PSListController 承载，而 items 又不在它
-	       要的位置 → 用户一按键就崩在 -[PSListController controllerForSpecifier:]。
-	     · 菜单文字用 label，不是 title。
-	     · items 里的 key 顺序，就是面板从上到下的显示顺序。
-	-->
 	<key>entry</key>
 	<dict>
 		<key>bundle</key>
@@ -20,91 +9,13 @@
 		<key>cell</key>
 		<string>PSLinkCell</string>
 		<key>detail</key>
-		<string>PSListItemsController</string>
-		<key>label</key>
-		<string>键盘音量</string>
+		<string>KbdVolPrefsRootController</string>
 		<key>icon</key>
 		<string>icon.png</string>
-	</dict>
-
-	<key>items</key>
-	<array>
-		<string>volGroup</string>
-		<string>enableSwitch</string>
-		<string>volumeSlider</string>
-		<string>hintGroup</string>
-		<string>diagGroup</string>
-		<string>showDiag</string>
-	</array>
-
-	<key>volGroup</key>
-	<dict>
-		<key>cell</key>
-		<string>PSGroupCell</string>
-		<key>label</key>
-		<string>键盘打字声</string>
-		<key>footerText</key>
-		<string>独立于静音拨片和系统音量。音量拉到 0 就是完全不打字声，来电、通知、铃声照常响。&#10;外部键盘与第三方输入法（百度 / 搜狗 / 微信输入法等）的按键声，请到那些 App 自己的设置里关闭。</string>
-	</dict>
-
-	<key>enableSwitch</key>
-	<dict>
-		<key>cell</key>
-		<string>PSSwitchCell</string>
-		<key>key</key>
-		<string>enabled</string>
-		<key>defaults</key>
-		<string>com.gusing.kbdvol</string>
-		<key>default</key>
-		<true/>
-		<key>label</key>
-		<string>启用独立音量控制</string>
-	</dict>
-
-	<key>volumeSlider</key>
-	<dict>
-		<key>cell</key>
-		<string>PSSliderCell</string>
-		<key>key</key>
-		<string>volume</string>
-		<key>defaults</key>
-		<string>com.gusing.kbdvol</string>
-		<key>default</key>
-		<real>1.0</real>
-		<key>min</key>
-		<real>0.0</real>
-		<key>max</key>
-		<real>1.0</real>
-		<key>showValue</key>
-		<true/>
-		<key>label</key>
-		<string>打字声音量</string>
-	</dict>
-
-	<key>hintGroup</key>
-	<dict>
-		<key>cell</key>
-		<string>PSGroupCell</string>
-		<key>footerText</key>
-		<string>0% = 完全不打字声（不用拨静音拨片）　　100% = 完全走系统原声，零延迟、音色不变&#10;改完立即生效，无需注销。打字声是否真的挂上，请点下面按钮看实际状态。</string>
-	</dict>
-
-	<key>diagGroup</key>
-	<dict>
-		<key>cell</key>
-		<string>PSGroupCell</string>
-		<key>label</key>
-		<string>诊断</string>
-	</dict>
-
-	<key>showDiag</key>
-	<dict>
-		<key>cell</key>
-		<string>PSButtonCell</string>
+		<key>isController</key>
+		<string>YES</string>
 		<key>title</key>
-		<string>查看插件状态</string>
-		<key>action</key>
-		<string>showDiag</string>
+		<string>键盘音量</string>
 	</dict>
 </dict>
 </plist>
