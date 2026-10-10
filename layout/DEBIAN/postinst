@@ -1,27 +1,51 @@
 #!/bin/sh
-# KbdVol 安装后处理。
-# 目标：保证设置里能稳定出现「键盘音量」这一项。
-# 覆盖安装时可能留下上一版的 dylib / RootHide 的 patch 副本，
-# PreferenceLoader 读到坏入口就会**静默不显示菜单项**（无任何报错），
-# 所以这里把它们清掉/改名，保证下次加载的是本次的干净版本。
-# 注意：不 set -e，所有动作吞错误，最后无条件 exit 0，绝不让安装失败。
+# KbdVol 安装后自检 —— 把"到底装没装上"变成可读文件，不再靠猜。
+# 现象参考：装完设置里连菜单项都没有，且卸载重装依旧没有。
+# 这个脚本会把每个关键文件的实际落地情况写到 /var/mobile/Documents/KbdVol-install.txt，
+# 用 Filza 打开即可判断是「没装上」还是「装上了但 PreferenceLoader 不显示」。
 
-JB=""
-for p in /var/jb /private/preboot ; do
-    if [ -d "$p" ] && [ -d "$p/Library/PreferenceLoader" ]; then JB="$p"; break; fi
+OUT="/var/mobile/Documents/KbdVol-install.txt"
+JB="/var/jb"
+[ -d "$JB/Library/PreferenceLoader" ] || JB="/private/preboot"
+
+{
+echo "==== KbdVol 安装自检 ===="
+echo "时间: $(date)"
+echo "jbroot前缀: $JB"
+echo " PreferenceLoader 扫描目录:"
+echo "   $JB/Library/PreferenceLoader/Preferences"
+echo ""
+echo "---- 逐个文件核对 ----"
+for f in \
+    "$JB/Library/PreferenceLoader/Preferences/KbdVolPrefs.plist" \
+    "$JB/Library/PreferenceBundles/KbdVolPrefs.bundle/KbdVolPrefs" \
+    "$JB/Library/PreferenceBundles/KbdVolPrefs.bundle/Info.plist" \
+    "$JB/Library/PreferenceBundles/KbdVolPrefs.bundle/icon.png" \
+    "$JB/Library/MobileSubstrate/DynamicLibraries/KbdVol.dylib" \
+    "$JB/Library/MobileSubstrate/DynamicLibraries/KbdVol.plist" \
+; do
+    if [ -e "$f" ]; then
+        echo "  [有] $(ls -l "$f" 2>/dev/null | awk '{print $1, $5"B"}')  $f"
+    else
+        echo "  [无]  $f"
+    fi
 done
-[ -z "$JB" ] && JB="/var/jb"
 
-# 1) RootHide 生成的 *.dylib.roothidepatch 会让新 dylib 不被采用 —— 改名作废（可回滚）
+echo ""
+echo "---- PreferenceLoader 目录下全部 plist（看本插件在不在）----"
+ls -l "$JB/Library/PreferenceLoader/Preferences/" 2>/dev/null
+
+echo ""
+echo "---- PreferenceLoader 进程是否注入设置 ----"
+echo " （无法在 postinst 判断，看下面的日志文件）"
+} > "$OUT" 2>/dev/null
+
+# RootHide 的 patch 缓存会让新 dylib 不被采用 —— 改名作废（可回滚）
 for f in \
     "$JB/usr/lib/TweakInject/KbdVol.dylib.roothidepatch" \
     "$JB/Library/MobileSubstrate/DynamicLibraries/KbdVol.dylib.roothidepatch"
 do
     [ -e "$f" ] && mv "$f" "$f.old" 2>/dev/null
 done
-
-# 2) 清掉 PreferenceLoader 可能缓存的本插件状态
-rm -f "$JB/Library/PreferenceLoader/Preferences/KbdVolPrefs.plist.stale" 2>/dev/null
-rm -f /var/mobile/Library/Preferences/com.gusing.kbdvol.plist 2>/dev/null
 
 exit 0
