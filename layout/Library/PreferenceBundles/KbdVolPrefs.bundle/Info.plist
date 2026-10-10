@@ -23,12 +23,8 @@
 	<key>CFBundlePackageType</key>
 	<string>BNDL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0.3</string>
+	<string>1.1.0</string>
 	<key>CFBundleVersion</key>
-	<string>4</string>
-	<key>PSTemplateSpecifier</key>
-	<string>Root</string>
-	<key>PSListControllerClass</key>
-	<string>KbdVolPrefsRootController</string>
+	<string>5</string>
 </dict>
 </plist>
