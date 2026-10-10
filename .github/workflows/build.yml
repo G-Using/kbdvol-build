@@ -40,6 +40,7 @@ jobs:
       - name: Build package
         run: |
           export PATH="$HOME/theos/bin:$PATH"; export THEOS="$HOME/theos"
+          chmod +x layout/DEBIAN/postinst 2>/dev/null || true
           make package FINALPACKAGE=1
 
       - uses: actions/upload-artifact@v4
