@@ -4,10 +4,10 @@
 <dict>
     <key>items</key>
     <array>
-        <!-- 标题 -->
+        <!-- 标题组 -->
         <dict>
             <key>cell</key>
-            <string>PSGroupCell</string>
+            <string>PSGroupSpecifier</string>
             <key>footerText</key>
             <string>独立控制键盘按键音音量，此滑块不影响系统音量（侧边按钮），也不影响铃声/媒体音量。
 • 滑块 0% = 完全静音（无需拨静音拨片）
@@ -19,7 +19,7 @@
         <!-- 总开关 -->
         <dict>
             <key>cell</key>
-            <string>PSSwitchCell</string>
+            <string>PSToggleSwitchSpecifier</string>
             <key>defaults</key>
             <string>com.gusing.kbdvol</string>
             <key>key</key>
@@ -30,10 +30,10 @@
             <true/>
         </dict>
 
-        <!-- 音量滑块 - 独立于系统音量 -->
+        <!-- 音量滑块 -->
         <dict>
             <key>cell</key>
-            <string>PSSliderCell</string>
+            <string>PSSliderSpecifier</string>
             <key>defaults</key>
             <string>com.gusing.kbdvol</string>
             <key>key</key>
@@ -48,21 +48,17 @@
             <real>1.0</real>
             <key>showValue</key>
             <true/>
-            <!-- 自定义读写方法 - 确保与 Tweak 同步 -->
-            <key>keyValueAction</key>
-            <string>setVolumeValue:specifier:</string>
-            <key>keyValueObserver</key>
-            <string>readVolumeValue</string>
         </dict>
 
-        <!-- 诊断 -->
+        <!-- 诊断组 -->
         <dict>
             <key>cell</key>
-            <string>PSGroupCell</string>
+            <string>PSGroupSpecifier</string>
             <key>label</key>
             <string>诊断</string>
         </dict>
 
+        <!-- 诊断按钮 -->
         <dict>
             <key>action</key>
             <string>showDiag</string>
